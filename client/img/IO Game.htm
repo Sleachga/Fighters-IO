@@ -1,0 +1,479 @@
+
+<!-- saved from url=(0022)http://localhost:1997/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>IO Game</title>
+    <link rel="stylesheet" href="./IO Game_files/index.css">
+</head>
+
+<!-- Sign in state <div> tag -->
+<body><div id="signDiv" style="display: none;">
+    Username: <input id="signDiv-username" type="text" autocomplete="off" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAkCAYAAADo6zjiAAAAAXNSR0IArs4c6QAAAbNJREFUWAntV8FqwkAQnaymUkpChB7tKSfxWCie/Yb+gbdeCqGf0YsQ+hU95QNyDoWCF/HkqdeiIaEUqyZ1ArvodrOHxanQOiCzO28y781skKwFW3scPV1/febP69XqarNeNTB2KGs07U3Ttt/Ozp3bh/u7V7muheQf6ftLUWyYDB5yz1ijuPAub2QRDDunJsdGkAO55KYYjl0OUu1VXOzQZ64Tr+IiPXedGI79bQHdbheCIAD0dUY6gV6vB67rAvo6IxVgWVbFy71KBKkAFaEc2xPQarXA931ot9tyHphiPwpJgSbfe54Hw+EQHMfZ/msVEEURjMfjCjbFeG2dFxPo9/sVOSYzxmAwGIjnTDFRQLMQAjQ5pJAQkCQJ5HlekeERxHEsiE0xUUCzEO9AmqYQhiF0Oh2Yz+ewWCzEY6aYKKBZCAGYs1wuYTabKdNNMWWxnaA4gp3Yry5JBZRlWTXDvaozUgGTyQSyLAP0dbb3DtQlmcan0yngT2ekE9ARc+z4AvC7nauh9iouhpcGamJeX8XF8MaClwaeROWRA7nk+tUnyzGvZrKg0/40gdME/t8EvgG0/NOS6v9NHQAAAABJRU5ErkJggg==&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;"><br>
+    Password: <input id="signDiv-password" type="text">
+    <button id="signDiv-signIn">Sign In</button>
+    <button id="signDiv-signUp">Sign Up</button>
+</div>
+
+<!-- Game state <div> tag -->
+<div id="gameDiv" style="display: inline-block;">
+    <canvas id="ctx" width="638" height="703" style="cursor: crosshair;"></canvas>
+
+    <img src="./IO Game_files/Sprite2.png" style="display: none" id="playerSprite" alt="Sprite 2">
+
+    <img src="./IO Game_files/background.jpg" style="display: none" id="background" alt="Background">
+
+    <div id="chat-text" style="width:500px; height:100px; overflow-y: scroll"></div>
+    <div>Chat!</div>
+
+    <form id="chat-form">
+        <input id="chat-input" type="text" style="width: 500px; background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAkCAYAAADo6zjiAAAAAXNSR0IArs4c6QAAAbNJREFUWAntV8FqwkAQnaymUkpChB7tKSfxWCie/Yb+gbdeCqGf0YsQ+hU95QNyDoWCF/HkqdeiIaEUqyZ1ArvodrOHxanQOiCzO28y781skKwFW3scPV1/febP69XqarNeNTB2KGs07U3Ttt/Ozp3bh/u7V7muheQf6ftLUWyYDB5yz1ijuPAub2QRDDunJsdGkAO55KYYjl0OUu1VXOzQZ64Tr+IiPXedGI79bQHdbheCIAD0dUY6gV6vB67rAvo6IxVgWVbFy71KBKkAFaEc2xPQarXA931ot9tyHphiPwpJgSbfe54Hw+EQHMfZ/msVEEURjMfjCjbFeG2dFxPo9/sVOSYzxmAwGIjnTDFRQLMQAjQ5pJAQkCQJ5HlekeERxHEsiE0xUUCzEO9AmqYQhiF0Oh2Yz+ewWCzEY6aYKKBZCAGYs1wuYTabKdNNMWWxnaA4gp3Yry5JBZRlWTXDvaozUgGTyQSyLAP0dbb3DtQlmcan0yngT2ekE9ARc+z4AvC7nauh9iouhpcGamJeX8XF8MaClwaeROWRA7nk+tUnyzGvZrKg0/40gdME/t8EvgG0/NOS6v9NHQAAAABJRU5ErkJggg==&quot;); background-repeat: no-repeat; background-attachment: scroll; background-size: contain; background-position: 98% 50%;" autocomplete="off">
+    </form>    
+</div>
+
+<script src="./IO Game_files/socket.io-1.4.5.js"></script>
+
+<script>
+var WIDTH = window.innerWidth;
+var HEIGHT = window.innerHeight;
+// Starts socket
+var socket = io();
+
+var mouseX = 0;
+var mouseY = 0;
+
+var DEBUG = true;
+
+// Sign-In
+var signDiv = document.getElementById('signDiv');
+var signDivUsername = document.getElementById('signDiv-username');
+var signDivSignIn = document.getElementById('signDiv-signIn');
+var signDivSignUp = document.getElementById('signDiv-signUp');
+var signDivPassword = document.getElementById('signDiv-password');
+// Sign-In button
+// onclick() - emits 'signIn' to socket with username and password
+signDivSignIn.onclick = function()
+{
+    socket.emit('signIn', 
+    {
+        username: signDivUsername.value, 
+        password: signDivPassword.value,
+    });
+}
+// Sign-Up button
+// onclick() - emits 'signUp' to socket with username and password 
+signDivSignUp.onclick = function()
+{
+    socket.emit('signUp', {
+        username: signDivUsername.value, 
+        password: signDivPassword.value,
+    });
+}
+
+// Recieves a 'signInRespomse' from the socket,
+// if data is good displays the game screen
+socket.on('signInResponse', function(data)
+{
+    if (data.success)
+    {
+        signedIn = true;
+        signDiv.style.display = 'none';
+        gameDiv.style.display = 'inline-block';
+    } else
+        alert('Sign in unsuccesful... Whoops!');
+}); 
+// Recieves a 'signUpResponse' from the socket,
+// Alerts sign up result
+socket.on('signUpResponse', function(data)
+{
+    if (data.success)
+    {
+        alert('Sign up successful!');
+    } else
+        alert('Sign up unsuccesful... Whoops!');
+}); 
+
+/// Variables for the chatbox
+var chatText = document.getElementById('chat-text');
+var chatInput = document.getElementById('chat-input');
+var chatForm = document.getElementById('chat-form');
+
+// Game
+var Img = {};
+Img.player = new Image();
+Img.player.src = '/client/img/player.png';
+Img.bullet = new Image();
+Img.bullet.src = '/client/img/bullet.png';
+Img.map = new Image();
+Img.map.src = '/client/img/background-3.png';
+Img.turret = new Image();
+Img.turret.src = 'client/img/test_sprites/towers/cannon/1_down.png';
+var ctx = document.getElementById("ctx").getContext("2d");
+ctx.font = '30px Arial';
+ctx.canvas.width  = window.innerWidth;
+ctx.canvas.height = window.innerHeight;
+
+var Turret = function(initPack)
+{
+    var self = {};
+    self.id = initPack.id;
+    self.x = initPack.x;
+    self.y = initPack.y;
+    self.hp = initPack.hp;
+    self.hpMax = initPack.hpMax;
+    self.draw = function()
+    {
+        var x = WIDTH/2 - Player.list[selfId].x + self.x;
+        var y = HEIGHT/2 - Player.list[selfId].y + self.y;
+        ctx.drawImage(Img.turret, x, y);
+
+        // Draw Health Bar
+        var hpWidth = 30 * self.hp / self.hpMax;
+        ctx.fillStyle = 'red';
+        ctx.fillRect(x + 10, y, hpWidth, 4);
+    }
+
+    Turret.list[self.id] = self;
+    return self;
+}
+
+Turret.list = {};
+
+var Player = function(initPack)
+{
+    var self = {};
+    self.id = initPack.id;
+    self.number = initPack.number;
+    self.x = initPack.x;
+    self.y = initPack.y;
+    self.hp = initPack.hp;
+    self.hpMax = initPack.hpMax;
+    self.hp = initPack.hp;
+    self.score = initPack.score;
+    self.draw = function() 
+    {
+        var image = true;
+        if (image) 
+        {
+            var x = self.x - Player.list[selfId].x + WIDTH/2;
+            var y = self.y - Player.list[selfId].y + HEIGHT/2; 
+            
+            // HP Bar
+            var hpWidth = 30 * self.hp / self.hpMax;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(x - hpWidth/2, y - 40, hpWidth, 4);
+            
+            var width = Img.player.width*2;
+            var height = Img.player.height*2;
+            
+            // Player
+            ctx.drawImage(Img.player,
+                0,0, Img.player.width, Img.player.height,
+                x-width/2,y-height/2, width, height);
+        } 
+        else 
+        {
+            // Background Circle
+            ctx.beginPath();
+            ctx.moveTo(self.x, self.y);
+            ctx.arc(self.x, self.y, 16, 0, 2*Math.PI);
+            ctx.fillStyle = 'black';
+            ctx.fill()
+            // Main Circle
+            ctx.beginPath();
+            ctx.moveTo(self.x, self.y);
+            ctx.arc(self.x, self.y, 14, 0, 2*Math.PI);
+            ctx.fillStyle = 'gray';
+            ctx.fill();
+            // HP Bar
+            var hpWidth = 30 * self.hp / self.hpMax;
+            ctx.fillStyle = 'green';
+            ctx.fillRect(self.x - hpWidth/2, self.y - 40, hpWidth, 4);
+            // Score
+            ctx.fillText(self.score, self.x, self.y - 60);
+        }
+    }
+    Player.list[self.id] = self;
+    return self
+}
+
+Player.list = {};
+
+var Bullet = function(initPack)
+{
+    var self = {};
+    self.id = initPack.id;
+    self.x = initPack.x;
+    self.y = initPack.y;
+    self.draw = function() 
+    {
+        var image = true;
+        if (image)
+        {
+            var width = Img.bullet.width/2;
+            var height = Img.bullet.height/2;
+            var x = self.x - Player.list[selfId].x + WIDTH/2;
+            var y = self.y - Player.list[selfId].y + HEIGHT/2;
+            ctx.drawImage(Img.bullet,
+                0,0, Img.bullet.width, Img.bullet.height,
+                x-width/2, y-height/2, width, height);
+        }
+        else
+        {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(self.x-5, self.y-5, 10, 10);
+        }
+    }
+    Bullet.list[self.id] = self;
+    return self;
+}
+
+Bullet.list = {};
+
+var selfId = null;
+
+socket.on('init', function(data) {
+    if (data.selfId)
+        selfId = data.selfId;
+    for (var i = 0; i < data.player.length; i++)
+    {
+        new Player(data.player[i]);
+    }
+    for (var i = 0; i < data.turret.length; i++)
+    {
+        new Turret(data.turret[i]);
+    }
+    for (var i = 0; i < data.bullet.length; i++)
+    {
+        new Bullet(data.bullet[i]);
+    }
+});
+
+socket.on('update', function(data) {
+    
+    for (var i = 0; i < data.player.length; i++)
+    {
+        var pack = data.player[i];
+        var p = Player.list[pack.id];
+        if (p)
+        {
+            if (pack.x !== undefined)
+                p.x = pack.x;
+            if (pack.y !== undefined)
+                p.y = pack.y;
+            if (pack.hp !== undefined)
+                p.hp = pack.hp;
+            if (pack.score !== undefined)
+                p.score = pack.score;
+        }
+    }
+
+    for (var i = 0; i < data.turret.length; i++)
+    {
+        var pack = data.turret[i];
+        var t = Turret.list[pack.id];
+        if (t)
+        {
+            if (pack.hp !== undefined)
+                t.hp = pack.hp; 
+        }
+    }
+    
+    for (var i = 0; i < data.bullet.length; i++)
+    {
+        var pack = data.bullet[i];
+        var b = Bullet.list[data.bullet[i].id];
+        if (b)
+        {
+            if (pack.x !== undefined)
+                b.x = pack.x;
+            if (pack.y !== undefined)
+                b.y = pack.y;
+        }
+    }
+});
+
+socket.on('remove', function(data) {
+    for (var i = 0; i < data.player.length; i++)
+    {
+        delete Player.list[data.player[i]];
+    }
+    for (var i = 0; i < data.bullet.length; i++)
+    {
+        delete Bullet.list[data.bullet[i]];
+    }
+    for (var i = 0; i < data.turret.length; i++)
+    {
+        delete Turret.list[data.turret[i]];
+    }
+});
+
+setInterval(function() {
+    if (!selfId)
+        return;
+    ctx.clearRect(0,0, window.innerWidth, window.innerHeight);
+    drawMap();
+    drawScore();
+    // Draws players and bullets
+    for (var i in Player.list)
+        Player.list[i].draw();
+    for (var i in Bullet.list)
+        Bullet.list[i].draw();
+    for (var i in Turret.list)
+        Turret.list[i].draw();
+
+    // Draw X and Y position of player (debugging)
+    drawPos();
+}, 40);
+
+// todo - function to get mouse x and y
+
+// var drawCursor = function()
+// {
+//     ctx.drawImage(Img.cursor, x, y);
+// }
+
+var drawPos = function()
+{
+    if (DEBUG) 
+    {
+        var xCo = Player.list[selfId].x;
+        var yCo = Player.list[selfId].y;
+
+        ctx.fillStyle = 'white';
+        ctx.font = "10px verdana"
+        ctx.fillText("x: " + xCo +
+            " y: " + yCo, 12, 12);
+    }
+}
+
+var drawMap = function() 
+{
+    var image = true;
+    if (image)
+    {
+        var x = WIDTH/2 - Player.list[selfId].x;
+        var y = HEIGHT/2 - Player.list[selfId].y;
+        ctx.drawImage(Img.map, x, y);
+    }
+    // Draws the background lines - FIX THIS TO MAKE A LARGER MAP
+    else
+    {
+        ctx.strokeStyle = '#D6D6D6';
+        for (var i = 10; i < window.innerWidth; i+=20)
+        {
+            // Creates vertical lines every 10 pixels
+            ctx.beginPath();
+            ctx.moveTo(i,0);
+            ctx.lineTo(i,window.innerHeight);
+            ctx.stroke();
+            for (var j = 10; j < window.innerHeight; j+=20)
+            {
+                // Creates horizontal lines every 10 pixels
+                ctx.beginPath();
+                ctx.moveTo(0,j)
+                ctx.lineTo(window.innerWidth,j)
+                ctx.stroke();
+            }
+        }
+    }
+}
+var drawScore = function(){
+    ctx.fillStyle = 'black';
+    ctx.globalAlpha = 0.5;
+    ctx.fillRect(0, 0, WIDTH, 40);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'white';
+    ctx.font = "30px Verdana";
+    ctx.fillText("Score: " + Player.list[selfId].score, WIDTH/2 - 55, 30);
+}
+// Recieves an 'addToChat' from the socket
+// Adds a <div> containing the chat Data to chatText
+socket.on('addToChat', function(data)
+{
+    chatText.innerHTML += '<div>' + data + '</div>';
+})
+// Receives an 'evalAnswer' from the socket
+// Alerts console of an Eval Answer
+socket.on('evalAnswer', function(data)
+{
+    if (DEBUG) console.log('*DEBUG* Eval Answer');
+    console.log(data);
+});
+// Submits the chatForm
+// Checks if the chat starts with a / and emits an 'evalServer' to socket
+chatForm.onsubmit = function(event)
+{
+    event.preventDefault();
+    if(chatInput.value[0] === '/')
+    {
+        socket.emit('evalServer', chatInput.value.slice(1));
+        if (DEBUG) console.log('*DEBUG* Eval Server');
+    }
+    else
+        socket.emit('sendMsgToServer', chatInput.value);
+    
+    chatInput.value = '';
+}
+// Checks if various keys are pressed and emits a 'keypress' : true to socket
+
+var signedIn = false;
+
+document.onkeydown = function(event)
+{
+    if(event.keyCode === 68)    //d
+        socket.emit('keyPress',{inputId:'right',state:true});
+    else if(event.keyCode === 83)   //s
+        socket.emit('keyPress',{inputId:'down',state:true});
+    else if(event.keyCode === 65) //a
+        socket.emit('keyPress',{inputId:'left',state:true});
+    else if(event.keyCode === 87) // w
+        socket.emit('keyPress',{inputId:'up',state:true});
+    else if(event.keyCode === 13 && !signedIn)
+    {
+        socket.emit('signIn', 
+        {
+            username: signDivUsername.value, 
+            password: signDivPassword.value
+        });
+
+        signedIn = true;
+    }
+}
+// Checks if various keys are no longer pressed and emits a 'keyPress' : true to socket
+document.onkeyup = function(event)
+{
+    if(event.keyCode === 68)    //d
+        socket.emit('keyPress',{inputId:'right',state:false});
+    else if(event.keyCode === 83)   //s
+        socket.emit('keyPress',{inputId:'down',state:false});
+    else if(event.keyCode === 65) //a
+        socket.emit('keyPress',{inputId:'left',state:false});
+    else if(event.keyCode === 87) // w
+        socket.emit('keyPress',{inputId:'up',state:false});
+}
+// Checks if mouse is clicked and emits a 'keyPress' attack:true to socket
+document.onmousedown = function(event)
+{
+    socket.emit('keyPress', {inputId: 'attack', state:true});
+}
+// Checks if mouse is no longer clicked and emits a 'keyPress' attack:false to socket
+document.onmouseup = function(event)
+{
+    socket.emit('keyPress', {inputId: 'attack', state:false});
+}
+// Checks if mouse moves and emits a 'keypress' mouseAngle:angle to socket
+// todo FIX ANGLE HERE
+document.onmousemove = function(event)
+{
+    // Set global mouseX and mouseY variables
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+
+    // alert(mouseX + " " + mouseY);
+
+    var x = -WIDTH/2 + event.clientX;
+    var y = -HEIGHT/2 + event.clientY;
+    var angle = Math.atan2(y,x) / Math.PI * 180;
+    socket.emit('keyPress', {inputId: 'mouseAngle', state: angle});
+}
+</script></body></html>
