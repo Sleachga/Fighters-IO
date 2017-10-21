@@ -480,7 +480,7 @@ document.onkeyup = function(event)
 // Checks if mouse is clicked and emits a 'keyPress' attack:true to socket
 document.onmousedown = function(event)
 {
-    if (signedIn && Player.list[selfId].characterPicked != true)
+    if (signedIn && Player.list[selfId].characterPicked === undefined)
     {
         var knightX = (WIDTH/2) - 210;
         var knightY = (HEIGHT/2) - 200;
