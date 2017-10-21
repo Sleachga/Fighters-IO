@@ -25,7 +25,7 @@
 
     <form id="chat-form">
         <input id="chat-input" type="text" style="width:500px"></input>
-    </form>    
+    </form>
 </div>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -60,18 +60,18 @@ var signDivPassword = document.getElementById('signDiv-password');
 // onclick() - emits 'signIn' to socket with username and password
 signDivSignIn.onclick = function()
 {
-    socket.emit('signIn', 
+    socket.emit('signIn',
     {
-        username: signDivUsername.value, 
+        username: signDivUsername.value,
         password: signDivPassword.value,
     });
 }
 // Sign-Up button
-// onclick() - emits 'signUp' to socket with username and password 
+// onclick() - emits 'signUp' to socket with username and password
 signDivSignUp.onclick = function()
 {
     socket.emit('signUp', {
-        username: signDivUsername.value, 
+        username: signDivUsername.value,
         password: signDivPassword.value,
     });
 }
@@ -87,7 +87,7 @@ socket.on('signInResponse', function(data)
         gameDiv.style.display = 'inline-block';
     } else
         alert('Sign in unsuccesful... Whoops!');
-}); 
+});
 
 // Recieves a 'signUpResponse' from the socket,
 // Alerts sign up result
@@ -98,7 +98,7 @@ socket.on('signUpResponse', function(data)
         alert('Sign up successful!');
     } else
         alert('Sign up unsuccesful... Whoops!');
-}); 
+});
 
 /// Variables for the chatbox
 var chatText = document.getElementById('chat-text');
@@ -112,7 +112,7 @@ ctx.canvas.height = window.innerHeight;
 
 var selfId = null;
 
-socket.on('init', function(data) 
+socket.on('init', function(data)
 {
     if (data.selfId)
         selfId = data.selfId;
@@ -130,7 +130,7 @@ socket.on('init', function(data)
     }
 });
 
-socket.on('update', function(data) 
+socket.on('update', function(data)
 {
 
     for (var i = 0; i < data.player.length; i++)
@@ -153,7 +153,7 @@ socket.on('update', function(data)
                 p.acceleration = pack.acceleration;
             if (pack.mouseAngle !== undefined)
                 p.mouseAngle = pack.mouseAngle;
-            
+
             if (pack.pressingAttack !== undefined)
             {
                 p.attacking = pack.pressingAttack;
@@ -168,7 +168,7 @@ socket.on('update', function(data)
         if (t)
         {
             if (pack.hp !== undefined)
-                t.hp = pack.hp; 
+                t.hp = pack.hp;
             if (pack.acceleration !== undefined)
                 t.acceleration = pack.acceleration;
             if (pack.x !== undefined)
@@ -183,7 +183,7 @@ socket.on('update', function(data)
             }
         }
     }
-    
+
     for (var i = 0; i < data.bullet.length; i++)
     {
         var pack = data.bullet[i];
@@ -202,7 +202,7 @@ socket.on('update', function(data)
     }
 });
 
-socket.on('remove', function(data) 
+socket.on('remove', function(data)
 {
     for (var i = 0; i < data.player.length; i++)
     {
@@ -218,7 +218,7 @@ socket.on('remove', function(data)
     }
 });
 
-socket.on('PlayerChoiceAns', function(data) 
+socket.on('PlayerChoiceAns', function(data)
 {
     Player.list[selfId].character = data;
     Player.list[selfId].characterPicked = true;
@@ -227,7 +227,7 @@ socket.on('PlayerChoiceAns', function(data)
 
 var characterPicked = false;
 
-setInterval(function() 
+setInterval(function()
 {
     if (!characterPicked)
     {
@@ -237,7 +237,7 @@ setInterval(function()
 
         if (!selfId)
             return;
-        
+
         ctx.clearRect(0,0, window.innerWidth, window.innerHeight);
         drawMap();
         drawScore();
@@ -252,7 +252,7 @@ setInterval(function()
 
         // Draw X and Y position of player (debugging)
         drawPos();
-    }    
+    }
 }, 40);
 
 // todo - function to get mouse x and y
@@ -265,7 +265,7 @@ setInterval(function()
 var characterChoice = function()
 {
     ctx.clearRect(0,0, window.innerWidth, window.innerHeight);
-    
+
     var mapX = (WIDTH/2) - (Img.map.width/2);
     var mapY = (HEIGHT/2) - (Img.map.height/2);
     ctx.drawImage(Img.map, mapX, mapY);
@@ -280,7 +280,7 @@ var characterChoice = function()
 
     var knightX = (WIDTH/2) - 210;
     var knightY = (HEIGHT/2) - 200;
-    if (mouseX > knightX 
+    if (mouseX > knightX
         && mouseX < (knightX + 200)
         && mouseY > knightY
         && mouseY < knightY + 200)
@@ -293,7 +293,7 @@ var characterChoice = function()
     if (mouseX > engineerX
         && mouseX < engineerX + 200
         && mouseY > engineerY
-        && mouseY < engineerY + 200)    
+        && mouseY < engineerY + 200)
         ctx.drawImage(Img.engineerW, engineerX, engineerY);
     else
         ctx.drawImage(Img.engineerP, engineerX, engineerY);
@@ -321,7 +321,7 @@ var characterChoice = function()
 
 var drawPos = function()
 {
-    if (DEBUG) 
+    if (DEBUG)
     {
         var xCo = Player.list[selfId].x;
         var yCo = Player.list[selfId].y;
@@ -333,10 +333,10 @@ var drawPos = function()
     }
 }
 
-var drawMap = function() 
+var drawMap = function()
 {
     var image = true;
-    
+
     if (image)
     {
         var x = WIDTH/2 - Player.list[selfId].x;
@@ -403,7 +403,7 @@ chatForm.onsubmit = function(event)
     }
     else
         socket.emit('sendMsgToServer', chatInput.value);
-    
+
     chatInput.value = '';
 }
 // Checks if various keys are pressed and emits a 'keypress' : true to socket
@@ -414,7 +414,7 @@ document.onkeydown = function(event)
     {
         socket.emit('keyPress',{inputId:'right',state:true});
         Player.list[selfId].right = true;
-    }    
+    }
     else if(event.keyCode === 83)   //s
     {
         socket.emit('keyPress',{inputId:'down',state:true});
@@ -431,15 +431,15 @@ document.onkeydown = function(event)
         Player.list[selfId].up = true;
     }
     else if (event.keyCode === 32) // space
-    { 
+    {
         socket.emit('keypress', {inputId:'space', state:true});
         Player.list[selfId].space = true;
     }
     else if (event.keyCode === 13 && !signedIn) //enter
     {
-        socket.emit('signIn', 
+        socket.emit('signIn',
         {
-            username: signDivUsername.value, 
+            username: signDivUsername.value,
             password: signDivPassword.value
         });
 
@@ -480,18 +480,18 @@ document.onkeyup = function(event)
 // Checks if mouse is clicked and emits a 'keyPress' attack:true to socket
 document.onmousedown = function(event)
 {
-    if (signedIn && !Player.list[selfId].characterPicked)
+    if (signedIn && characterPicked)
     {
         var knightX = (WIDTH/2) - 210;
         var knightY = (HEIGHT/2) - 200;
-        if (mouseX > knightX 
+        if (mouseX > knightX
             && mouseX < (knightX + 200)
             && mouseY > knightY
             && mouseY < knightY + 200)
         {
-            socket.emit('playerChoice', 
+            socket.emit('playerChoice',
                 {
-                    id: selfId, 
+                    id: selfId,
                     choice: 'knight'
                 });
         }
@@ -501,11 +501,11 @@ document.onmousedown = function(event)
         if (mouseX > engineerX
             && mouseX < engineerX + 200
             && mouseY > engineerY
-            && mouseY < engineerY + 200)    
+            && mouseY < engineerY + 200)
         {
-            socket.emit('playerChoice', 
+            socket.emit('playerChoice',
                 {
-                    id: selfId, 
+                    id: selfId,
                     choice: 'engineer'
                 });
         }
@@ -517,9 +517,9 @@ document.onmousedown = function(event)
             && mouseY > mageY
             && mouseY < mageY + 200)
         {
-            socket.emit('playerChoice', 
+            socket.emit('playerChoice',
                 {
-                    id: selfId, 
+                    id: selfId,
                     choice: 'mage'
                 });
         }
@@ -531,9 +531,9 @@ document.onmousedown = function(event)
             && mouseY > ninjaY
             && mouseY < ninjaY + 200)
         {
-            socket.emit('playerChoice', 
+            socket.emit('playerChoice',
             {
-                id: selfId, 
+                id: selfId,
                 choice: 'ninja'
             });
         }
@@ -564,9 +564,9 @@ document.onmousemove = function(event)
 }
 
 // Keeps Space bar from scrolling down the window
-window.addEventListener('keydown', function(e) 
+window.addEventListener('keydown', function(e)
 {
-  if(e.keyCode == 32 && e.target == document.body) 
+  if(e.keyCode == 32 && e.target == document.body)
   {
     e.preventDefault();
   }
