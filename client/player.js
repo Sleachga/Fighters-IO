@@ -1,14 +1,14 @@
 /*
- *  bullet.js by Sandy Leach 
+ *  bullet.js by Sandy Leach
  *  7/5/2017
  *  Player class for game
- * 
+ *
  *  TODO:
- *  
+ *
  *  Every level up player gets to pick to upgrade a stat
  *  Every 5 level up player gets to pick between two different power ups
  *
- *  
+ *
  */
 
 var shield = new Image();
@@ -25,7 +25,7 @@ var Player = function(initPack)
     self.hpMax = initPack.hpMax;
     self.hp = initPack.hp;
     self.score = initPack.score;
-    self.characterPicked = false
+    self.characterPicked = false;
     self.character = initPack.character;
     self.spriteCounter = 0;
     self.up = false;
@@ -35,15 +35,15 @@ var Player = function(initPack)
     self.space = false;
     self.attacking = false;
     self.mouseAngle = 0;
-    
-    self.draw = function() 
+
+    self.draw = function()
     {
         var image = true;
-        if (image) 
+        if (image)
         {
             var x = self.x - Player.list[selfId].x + WIDTH/2;
-            var y = self.y - Player.list[selfId].y + HEIGHT/2; 
-            
+            var y = self.y - Player.list[selfId].y + HEIGHT/2;
+
             // HP Bar
             var hpWidth = 30 * self.hp / self.hpMax;
             ctx.fillStyle = 'black';
@@ -60,7 +60,7 @@ var Player = function(initPack)
             {
                 case 'knight':
 
-                    // Draw shield 
+                    // Draw shield
                     var testNum = 0;
                     var realAngle;
 
@@ -91,7 +91,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.knightUp1,
                                 0,0, Img.knightUp1.width, Img.knightUp1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightUp2.width*2;
@@ -129,7 +129,7 @@ var Player = function(initPack)
                             var height = Img.knightUpRight1.height*2;
                             ctx.drawImage(Img.knightUpRight1,
                                 0,0, Img.knightUpRight1.width, Img.knightUpRight1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightUpRight2.width*2;
@@ -164,7 +164,7 @@ var Player = function(initPack)
                             var height = Img.knightRight1.height*2;
                             ctx.drawImage(Img.knightRight1,
                                 0,0, Img.knightRight1.width, Img.knightRight1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightRight2.width*2;
@@ -199,7 +199,7 @@ var Player = function(initPack)
                             var height = Img.knightDownRight1.height*2;
                             ctx.drawImage(Img.knightDownRight1,
                                 0,0, Img.knightDownRight1.width, Img.knightDownRight1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightDownRight2.width*2;
@@ -234,7 +234,7 @@ var Player = function(initPack)
                             var height = Img.knightDown1.height*2;
                             ctx.drawImage(Img.knightDown1,
                                 0,0, Img.knightDown1.width, Img.knightDown1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightDown2.width*2;
@@ -269,7 +269,7 @@ var Player = function(initPack)
                             var height = Img.knightDownLeft1.height*2;
                             ctx.drawImage(Img.knightDownLeft1,
                                 0,0, Img.knightDownLeft1.width, Img.knightDownLeft1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightDownLeft2.width*2;
@@ -304,7 +304,7 @@ var Player = function(initPack)
                             var height = Img.knightLeft1.height*2;
                             ctx.drawImage(Img.knightLeft1,
                                 0,0, Img.knightLeft1.width, Img.knightLeft1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightLeft2.width*2;
@@ -339,7 +339,7 @@ var Player = function(initPack)
                             var height = Img.knightUpLeft1.height*2;
                             ctx.drawImage(Img.knightUpLeft1,
                                 0,0, Img.knightUpLeft1.width, Img.knightUpLeft1.height, x-width/2, y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.knightUpLeft2.width*2;
@@ -372,7 +372,7 @@ var Player = function(initPack)
 
                 break;
 
-                case 'mage': 
+                case 'mage':
                     var width = Img.mage.width*2;
                     var height = Img.mage.height*2;
                     ctx.drawImage(Img.mage,
@@ -380,7 +380,7 @@ var Player = function(initPack)
                         x-width/2,y-height/2, width, height);
                 break;
 
-                case 'ninja': 
+                case 'ninja':
 
                     if (self.up && !self.left && !self.right && !self.down)
                     {
@@ -395,7 +395,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaUp1,
                                 0,0, Img.ninjaUp1.width, Img.ninjaUp1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaUp2.width*2;
@@ -434,7 +434,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaUpRight1,
                                 0,0, Img.ninjaUpRight1.width, Img.ninjaUpRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaUpRight2.width*2;
@@ -473,7 +473,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaRight1,
                                 0,0, Img.ninjaRight1.width, Img.ninjaRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaRight2.width*2;
@@ -512,7 +512,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaDownRight1,
                                 0,0, Img.ninjaDownRight1.width, Img.ninjaDownRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaDownRight2.width*2;
@@ -551,7 +551,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaDown1,
                                 0,0, Img.ninjaDown1.width, Img.ninjaDown1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaDown2.width*2;
@@ -590,7 +590,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaDownLeft1,
                                 0,0, Img.ninjaDownLeft1.width, Img.ninjaDownLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaDownLeft2.width*2;
@@ -629,7 +629,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaLeft1,
                                 0,0, Img.ninjaLeft1.width, Img.ninjaLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaLeft2.width*2;
@@ -668,7 +668,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.ninjaUpLeft1,
                                 0,0, Img.ninjaUpLeft1.width, Img.ninjaUpLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.ninjaUpLeft2.width*2;
@@ -703,8 +703,8 @@ var Player = function(initPack)
                     }
                 break;
 
-                case 'engineer': 
-                    
+                case 'engineer':
+
                     if (self.up && !self.left && !self.right && !self.down)
                     {
                         if (self.spriteCounter === 4)
@@ -718,7 +718,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerUp1,
                                 0,0, Img.engineerUp1.width, Img.engineerUp1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerUp2.width*2;
@@ -757,7 +757,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerUpRight1,
                                 0,0, Img.engineerUpRight1.width, Img.engineerUpRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerUpRight2.width*2;
@@ -796,7 +796,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerRight1,
                                 0,0, Img.engineerRight1.width, Img.engineerRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerRight2.width*2;
@@ -837,7 +837,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerDownRight1,
                                 0,0, Img.engineerDownRight1.width, Img.engineerDownRight1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerDownRight2.width*2;
@@ -877,7 +877,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerDown1,
                                 0,0, Img.engineerDown1.width, Img.engineerDown1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerDown2.width*2;
@@ -916,7 +916,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerDownLeft1,
                                 0,0, Img.engineerDownLeft1.width, Img.engineerDownLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerDownLeft2.width*2;
@@ -955,7 +955,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerLeft1,
                                 0,0, Img.engineerLeft1.width, Img.engineerLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerLeft2.width*2;
@@ -994,7 +994,7 @@ var Player = function(initPack)
                             ctx.drawImage(Img.engineerUpLeft1,
                                 0,0, Img.engineerUpLeft1.width, Img.engineerUpLeft1.height,
                                 x-width/2,y-height/2, width, height);
-                        } 
+                        }
                         else if (self.spriteCounter === 2)
                         {
                             var width = Img.engineerUpLeft2.width*2;
@@ -1030,8 +1030,8 @@ var Player = function(initPack)
 
                 break;
             }
-        } 
-        else 
+        }
+        else
         {
             // Background Circle
             ctx.beginPath();
