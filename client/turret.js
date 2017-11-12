@@ -22,10 +22,10 @@ var Turret = function(initPack)
         var hpWidth = 30 * self.hp / self.hpMax;
         ctx.fillStyle = 'red';
         ctx.fillRect(x + 10, y, hpWidth, 4);
-    }
+    };
 
     Turret.list[self.id] = self;
     return self;
-}
+};
 
 Turret.list = {};

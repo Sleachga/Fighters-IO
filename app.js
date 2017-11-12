@@ -53,7 +53,7 @@ var SOCKET_LIST = {};
 var canvasWidth;
 var canvasHeight;
 
-// Base variable for all objects
+// Base class for all objects
 var Entity = function ()
 {
     var self =
@@ -87,6 +87,8 @@ var Entity = function ()
     return self;
 };
 
+// Turret object, not currently being used due to bugs
+// Doesn't move but shoots bullets at any player that comes close
 var Turret = function (id, x, y)
 {
     var self = Entity();
@@ -94,7 +96,7 @@ var Turret = function (id, x, y)
     self.id = id;
     self.x = x;  // player horizontal position
     self.y = y;  // player vertical position
-    self.shotAngle = 0; // R // player shot angle
+    self.shotAngle = 0; // R player shot angle
     self.reload = 5; //
     self.reloadTimer = 0;
     self.hp = 10;
@@ -251,16 +253,16 @@ var Player = function (id)
     self.pressingDown = false;
     self.pressingAttack = false;
     self.mouseAngle = 0;
-    self.maxSpd = 10;
+    self.maxSpd = 10; // Speed, transitioning into accel
     self.hp = 10;
     self.hpMax = 10;
     self.score = 0;
-    self.reload = 5;
+    self.reload = 5; // Max value for reloadTimer
     self.reloadTimer = 0;
     self.special = false;
     self.character = 'undefined';
     self.pickedClass = false;
-    self.bulletSpeed = 1;
+    self.bulletSpeed = 1; // How fast bullets are shot
     self.ninjaReload = 0;
     self.damage = 1;
 
@@ -280,13 +282,9 @@ var Player = function (id)
             self.shootBullet(self.mouseAngle);
             self.reloadTimer = 0;
         }
-        else if (self.class === 'knight')
-        {
-            // Put the shield up
-        }
     };
 
-    self.shootBullet = function(angle)
+    self.shootBullet = function (angle)
     {
         if (self.character === 'ninja')
         {
@@ -316,7 +314,6 @@ var Player = function (id)
         }
         else
         {
-            console.log('Class not picked');
             var b = Bullet(self.id, angle, self.bulletSpeed, self.damage);
             b.x = self.x;
             b.y = self.y;
@@ -407,14 +404,9 @@ Player.onConnect = function (socket)
             player.pressingAttack = data.state;
         else if (data.inputId === 'mouseAngle')
         {
-            console.log('Player ' + data.id + ' Angle ' + Math.round(data.stat));
-
             if (Player.list[data.id])
-            {
                 Player.list[data.id].mouseAngle = Math.round(data.state);
 
-                console.log("Player: " + data.id + " Angle: " + Player.list[data.id].mouseAngle);
-            }
 
             // player.list[data.id].mouseAngle = Math.round(data.state);
         }
@@ -428,7 +420,7 @@ Player.onConnect = function (socket)
             selfId: socket.id,
             player: Player.getAllInitPack(),
             bullet: Bullet.getAllInitPack(),
-            turret: Turret.getAllInitPack(),
+            turret: Turret.getAllInitPack()
         });
 };
 
@@ -531,7 +523,7 @@ var Bullet = function (parent, angle, speed, damage)
             parentId: self.parent,
             id: self.id,
             x: self.x,
-            y: self.y,
+            y: self.y
         };
     };
 
@@ -541,7 +533,7 @@ var Bullet = function (parent, angle, speed, damage)
             id: self.id,
             x: self.x,
             y: self.y,
-            acceleration: self.acceleration,
+            acceleration: self.acceleration
         };
     };
 
@@ -583,38 +575,38 @@ var DEBUG = false;
 var isValidPassword = function (data, cb)
 {
     return cb(true);
-    db.account.find({username: data.username, password: data.password}, function (err, res)
-    {
-        if (res.length > 0)
-            cb(true);
-        else
-            cb(false);
-    });
+    // db.account.find({username: data.username, password: data.password}, function (err, res)
+    // {
+    //     if (res.length > 0)
+    //         cb(true);
+    //     else
+    //         cb(false);
+    // });
 };
 
 var isUsernameTaken = function (data, cb)
 {
     return cb(false);
-    db.account.find({username: data.username}, function (err, res)
-    {
-        if (res.length > 0)
-            cb(true);
-        else
-            cb(false);
-    });
+    // db.account.find({username: data.username}, function (err, res)
+    // {
+    //     if (res.length > 0)
+    //         cb(true);
+    //     else
+    //         cb(false);
+    // });
 };
 
 var addUser = function (data, cb)
 {
     return cb();
-    db.account.insert(
-        {
-            username: data.username,
-            password: data.password
-        }, function (err)
-        {
-            cb();
-        });
+    // db.account.insert(
+    //     {
+    //         username: data.username,
+    //         password: data.password
+    //     }, function (err)
+    //     {
+    //         cb();
+    //     });
 };
 
 var io = require('socket.io')(serv, {});
@@ -707,18 +699,20 @@ io.sockets.on('connection', function (socket)
 
         var curPlayer = Player.list[data.id];
 
-        // Specific class variables are set
+        // Specific class variables are set - HERE CHARACTER CHANGES
         if (data.choice === 'ninja')
         {
             curPlayer.maxSpd = 10;
             curPlayer.reload = 2;
-            curPlayer.bulletSpeed = 2;
+            curPlayer.bulletSpeed = 1.7;
         }
         else if (data.choice === 'knight')
         {
             //Do knight Stuff
             curPlayer.maxSpd = 5;
-            curPlayer.damage = 5;
+            curPlayer.damage = 4;
+            curPlayer.reload = 30;
+            curPlayer.bulletSpeed = 1;
         }
         else if (data.choice === 'engineer')
         {
@@ -728,8 +722,9 @@ io.sockets.on('connection', function (socket)
         }
         else if (data.choice === 'mage')
         {
-            curPlayer.reload = 10;
-            curPlayer.bulletSpeed = 3;
+            curPlayer.reload = 15;
+            curPlayer.bulletSpeed = 2;
+            curPlayer.damage = 3;
         }
 
         socket.emit('PlayerChoiceAns', data.choice);

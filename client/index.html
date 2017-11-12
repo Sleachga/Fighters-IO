@@ -139,10 +139,11 @@
 
     socket.on('update', function (data)
     {
+        var pack;
 
         for (var i = 0; i < data.player.length; i++)
         {
-            var pack = data.player[i];
+            pack = data.player[i];
             var p = Player.list[pack.id];
             if (p)
             {
@@ -177,7 +178,7 @@
 
         for (var i = 0; i < data.turret.length; i++)
         {
-            var pack = data.turret[i];
+            pack = data.turret[i];
             var t = Turret.list[pack.id];
             if (t)
             {
@@ -200,7 +201,7 @@
 
         for (var i = 0; i < data.bullet.length; i++)
         {
-            var pack = data.bullet[i];
+            pack = data.bullet[i];
             var b = Bullet.list[data.bullet[i].id];
             if (b)
             {
