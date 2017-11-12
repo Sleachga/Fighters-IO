@@ -6,19 +6,35 @@
  *  TODO:
  *
  *  Stop players from moving within 5 pixels of each other
+ *  Label all variables
  *
+ *  Make Mage Animations
+ *  Make Mage reload time much longer
+ *  Make Mage damage High
+ *  Change bullets Based off Class
+ *
+ *  Make Sword Animation for knight
+ *  Have a point based off of angle + distance
+ *  If that point is within a certain amount of pixels of a player
+ *      do damage
+ *
+ *  Change movement speed accordingly
+ *
+ *  Make the map larger and match player map constraints
+ *
+ *  Long-Term -> Switch to acceleration instead of simple speed
  *
  */
 
 // var mongojs = require("mongojs");
-var db = null // mongojs('localhost:27017/myGame', ["account", "progress"]);
+var db = null; // mongojs('localhost:27017/myGame', ["account", "progress"]);
 
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 
 // gets index.html for express
-app.get('/', function(req, res)
+app.get('/', function (req, res)
 {
     res.sendFile(__dirname + '/client/index.html');
 });
@@ -38,48 +54,48 @@ var canvasWidth;
 var canvasHeight;
 
 // Base variable for all objects
-var Entity = function()
+var Entity = function ()
 {
     var self =
-    {
-        x: 10 + Math.random() * 480,
-        y: 10 + Math.random() * 480,
-        acceleration: 0,
-        spdX: 0,
-        spdY: 0,
-        id: "",
-    }
+        {
+            x: 10 + Math.random() * 480,
+            y: 10 + Math.random() * 480,
+            acceleration: 0,
+            spdX: 0,
+            spdY: 0,
+            id: ""
+        };
     // update function
-    self.update = function()
+    self.update = function ()
     {
         self.updatePosition();
-    }
+    };
     // updatePosition() that updates location based on speed x and y
-    self.updatePosition = function()
+    self.updatePosition = function ()
     {
         // A = Δv / t
         // acceleration = ΔspdX / t
         self.x += self.spdX + self.acceleration;
         self.y += self.spdY + self.acceleration;
-    }
+    };
 
-    self.getDistance = function(pt)
+    self.getDistance = function (pt)
     {
-        return Math.sqrt(Math.pow(self.x-pt.x,2) + Math.pow(self.y-pt.y,2));
-    }
+        return Math.sqrt(Math.pow(self.x - pt.x, 2) + Math.pow(self.y - pt.y, 2));
+    };
 
     return self;
-}
+};
 
-var Turret = function(id, x, y)
+var Turret = function (id, x, y)
 {
     var self = Entity();
 
     self.id = id;
-    self.x = x;
-    self.y = y;
-    self.shotAngle = 0;
-    self.reload = 5;
+    self.x = x;  // player horizontal position
+    self.y = y;  // player vertical position
+    self.shotAngle = 0; // R // player shot angle
+    self.reload = 5; //
     self.reloadTimer = 0;
     self.hp = 10;
     self.hpMax = 10;
@@ -91,58 +107,57 @@ var Turret = function(id, x, y)
     self.bulletSpeed = 2;
     self.damage = 2;
 
-    self.getInitPack = function()
+    self.getInitPack = function ()
     {
         return {
-            id:self.id,
-            x:self.x,
-            y:self.y,
-            hp:self.hp,
-            hpMax:self.hpMax,
+            id: self.id,
+            x: self.x,
+            y: self.y,
+            hp: self.hp,
+            hpMax: self.hpMax
         };
-    }
+    };
 
-    self.getUpdatePack = function()
+    self.getUpdatePack = function ()
     {
         return {
-            hp:self.hp,
-            attacking:self.attacking,
-            attackList:self.attackList,
-            acceleration:self.acceleration,
-        }
-    }
+            hp: self.hp,
+            attacking: self.attacking,
+            attackList: self.attackList,
+            acceleration: self.acceleration
 
-    self.shootBullet = function(angle)
+        }
+    };
+
+    self.shootBullet = function (angle)
     {
         var b = Bullet(self.id, self.angle, self.bulletSpeed, self.damage);
         b.x = self.x + 30;
         b.y = self.y + 30;
-    }
+    };
 
-    self.update = function()
+    self.update = function ()
     {
         self.combat();
+        if (self.hp <= 0) self.toRemove = true;
+    };
 
-        if (self.hp <= 0)
-        {
-            self.toRemove = true;
-        }
-    }
-
-    self.getDistance = function(x, y)
+    self.getDistance = function (x, y)
     {
-        return Math.sqrt(Math.pow(self.x-x,2) + Math.pow(self.y-y,2));
-    }
+        return Math.sqrt(Math.pow(self.x - x, 2) + Math.pow(self.y - y, 2));
+    };
 
-    self.combat = function()
+    self.combat = function ()
     {
+        var x, y, id;
+
         // Check player list and add in-range players to combatList
         for (var i in Player.list)
         {
             var skip = false;
 
-            var x = Player.list[i].x;
-            var y = Player.list[i].y;
+            x = Player.list[i].x;
+            y = Player.list[i].y;
 
             // CHECK IF THE PLAYER IS ALREADY IN THE LIST
             for (var j in self.combatList)
@@ -161,9 +176,9 @@ var Turret = function(id, x, y)
         // Check combatList and remove players out of range
         for (var i in self.combatList)
         {
-            var id = self.combatList[i];
-            var x = Player.list[id].x;
-            var y = Player.list[id].y;
+            id = self.combatList[i];
+            x = Player.list[id].x;
+            y = Player.list[id].y;
 
             var distance = self.getDistance(x, y);
 
@@ -178,36 +193,36 @@ var Turret = function(id, x, y)
         if (self.reloadTimer >= self.reload &&
             self.combatList.length > 0)
         {
-            var id = self.combatList[0];
-            var x = Player.list[id].x;
-            var y = Player.list[id].y;
+            id = self.combatList[0];
+            x = Player.list[id].x;
+            y = Player.list[id].y;
 
             var angle = Math.atan2(y - self.y, x - self.x) * 180 / Math.PI;
             self.shootBullet(angle);
             self.reloadTimer = 0;
         }
         self.reloadTimer++;
-    }
+    };
 
     Turret.list[self.id] = self;
     initPack.turret.push(self.getInitPack());
     return self;
-}
+};
 
 Turret.list = {};
 
-Turret.getAllInitPack = function()
+Turret.getAllInitPack = function ()
 {
     var turrets = [];
     for (var i in Turret.list)
         turrets.push(Turret.list[i].getInitPack());
     return turrets;
-}
+};
 
-Turret.update = function()
+Turret.update = function ()
 {
     var pack = [];
-    for(var i in Turret.list)
+    for (var i in Turret.list)
     {
         var turret = Turret.list[i];
         turret.update();
@@ -215,14 +230,15 @@ Turret.update = function()
         {
             delete Turret.list[i];
             removePack.turret.push(turret.id);
-        } else
+        }
+        else
             pack.push(turret.getUpdatePack());
     }
     return pack;
-}
+};
 
 // Player object
-var Player = function(id)
+var Player = function (id)
 {
     var self = Entity();
     self.id = id;
@@ -252,14 +268,14 @@ var Player = function(id)
 
     // update() uses polymorphism and checks conditions to shoot bullets
 
-    self.update = function()
+    self.update = function ()
     {
         self.reloadTimer++;
 
         self.updateSpd();
         super_update();
 
-        if(self.pressingAttack && self.reloadTimer > self.reload)
+        if (self.pressingAttack && self.reloadTimer > self.reload)
         {
             self.shootBullet(self.mouseAngle);
             self.reloadTimer = 0;
@@ -267,9 +283,8 @@ var Player = function(id)
         else if (self.class === 'knight')
         {
             // Put the shield up
-
         }
-    }
+    };
 
     self.shootBullet = function(angle)
     {
@@ -306,10 +321,10 @@ var Player = function(id)
             b.x = self.x;
             b.y = self.y;
         }
-    }
+    };
 
 
-    self.updateSpd = function()
+    self.updateSpd = function ()
     {
         if (self.pressingRight && self.x <= 1000)
             self.spdX = self.maxSpd;
@@ -324,57 +339,61 @@ var Player = function(id)
             self.spdY = self.maxSpd;
         else
             self.spdY = 0;
-    }
+    };
 
-    self.getInitPack = function()
+    self.getInitPack = function ()
     {
         return {
-            id:self.id,
-            x:self.x,
-            y:self.y,
-            number:self.number,
-            hp:self.hp,
-            hpMax:self.hpMax,
-            score:self.score,
-            class:self.class,
+            id: self.id,
+            x: self.x,
+            y: self.y,
+            number: self.number,
+            hp: self.hp,
+            hpMax: self.hpMax,
+            score: self.score,
+            class: self.class
         };
-    }
+    };
 
-    self.getUpdatePack = function()
+    self.getUpdatePack = function ()
     {
         if (!self.pickedClass)
             return {
-                id:self.id,
-                x:self.x,
-                y:self.y,
-                hp:self.hp,
-                score:self.score,
-            }
+                id: self.id,
+                x: self.x,
+                y: self.y,
+                hp: self.hp,
+                score: self.score
+            };
         else
             return {
-                id:self.id,
-                x:self.x,
-                y:self.y,
-                hp:self.hp,
-                score:self.score,
-                character:self.character,
-                pressingAttack:self.pressingAttack,
-                mouseAngle:self.mouseAngle,
-                acceleration:self.acceleration,
+                id: self.id,
+                x: self.x,
+                y: self.y,
+                hp: self.hp,
+                score: self.score,
+                character: self.character,
+                pressingAttack: self.pressingAttack,
+                pressingUp: self.pressingUp,
+                pressingDown: self.pressingDown,
+                pressingLeft: self.pressingLeft,
+                pressingRight: self.pressingRight,
+                mouseAngle: self.mouseAngle,
+                acceleration: self.acceleration
             }
-    }
+    };
 
     Player.list[id] = self;
     initPack.player.push(self.getInitPack());
     return self;
-}
+};
 
 Player.list = {};
 
-Player.onConnect = function(socket)
+Player.onConnect = function (socket)
 {
     var player = Player(socket.id);
-    socket.on('keyPress', function(data)
+    socket.on('keyPress', function (data)
     {
         if (data.inputId === 'left')
             player.pressingLeft = data.state;
@@ -405,56 +424,56 @@ Player.onConnect = function(socket)
     });
 
     socket.emit('init',
-    {
-        selfId:socket.id,
-        player:Player.getAllInitPack(),
-        bullet:Bullet.getAllInitPack(),
-        turret:Turret.getAllInitPack(),
-    });
-}
+        {
+            selfId: socket.id,
+            player: Player.getAllInitPack(),
+            bullet: Bullet.getAllInitPack(),
+            turret: Turret.getAllInitPack(),
+        });
+};
 
-Player.getAllInitPack = function()
+Player.getAllInitPack = function ()
 {
     var players = [];
     for (var i in Player.list)
         players.push(Player.list[i].getInitPack());
     return players;
-}
+};
 
-Player.onDisconnect = function(socket)
+Player.onDisconnect = function (socket)
 {
     delete Player.list[socket.id];
     removePack.player.push(socket.id);
-}
+};
 
-Player.update = function()
+Player.update = function ()
 {
     var pack = [];
-    for(var i in Player.list)
+    for (var i in Player.list)
     {
         var player = Player.list[i];
         player.update();
         pack.push(player.getUpdatePack());
     }
     return pack;
-}
+};
 
-var Bullet = function(parent, angle, speed, damage)
+var Bullet = function (parent, angle, speed, damage)
 {
     var self = Entity();
     self.id = Math.random();
     self.speed = speed;
-    self.spdX = self.speed * Math.cos(angle/180*Math.PI) * 10;
-    self.spdY = self.speed * Math.sin(angle/180*Math.PI) * 10;
+    self.spdX = self.speed * Math.cos(angle / 180 * Math.PI) * 10;
+    self.spdY = self.speed * Math.sin(angle / 180 * Math.PI) * 10;
     self.damage = damage;
     self.parent = parent;
     self.timer = 0;
     self.toRemove = false;
     var super_update = self.update;
 
-    self.update = function()
+    self.update = function ()
     {
-        if(self.timer++ > 20)
+        if (self.timer++ > 20)
             self.toRemove = true;
 
         super_update();
@@ -504,9 +523,9 @@ var Bullet = function(parent, angle, speed, damage)
                 self.toRemove = true;
             }
         }
-    }
+    };
 
-    self.getInitPack = function()
+    self.getInitPack = function ()
     {
         return {
             parentId: self.parent,
@@ -514,29 +533,29 @@ var Bullet = function(parent, angle, speed, damage)
             x: self.x,
             y: self.y,
         };
-    }
+    };
 
-    self.getUpdatePack = function()
+    self.getUpdatePack = function ()
     {
         return {
             id: self.id,
             x: self.x,
             y: self.y,
-            acceleration:self.acceleration,
+            acceleration: self.acceleration,
         };
-    }
+    };
 
     Bullet.list[self.id] = self;
     initPack.bullet.push(self.getInitPack());
     return self;
-}
+};
 
 Bullet.list = {};
 
-Bullet.update = function()
+Bullet.update = function ()
 {
     var pack = [];
-    for(var i in Bullet.list)
+    for (var i in Bullet.list)
     {
         var bullet = Bullet.list[i];
         bullet.update();
@@ -544,126 +563,133 @@ Bullet.update = function()
         {
             delete Bullet.list[i];
             removePack.bullet.push(bullet.id);
-        } else
+        }
+        else
             pack.push(bullet.getUpdatePack());
     }
     return pack;
-}
+};
 
-Bullet.getAllInitPack = function()
+Bullet.getAllInitPack = function ()
 {
     var bullets = [];
     for (var i in Bullet.list)
         bullets.push(Bullet.list[i].getInitPack());
     return bullets;
-}
+};
 
 var DEBUG = false;
 
-var isValidPassword = function(data, cb)
+var isValidPassword = function (data, cb)
 {
     return cb(true);
-    db.account.find({username:data.username,password:data.password}, function(err,res)
-    {
-        if(res.length > 0)
-            cb(true);
-        else
-            cb(false);
-    });
-}
-
-var isUsernameTaken = function(data, cb)
-{
-    return cb(false);
-    db.account.find({username:data.username}, function(err, res)
+    db.account.find({username: data.username, password: data.password}, function (err, res)
     {
         if (res.length > 0)
             cb(true);
         else
             cb(false);
     });
-}
+};
 
-var addUser = function(data, cb)
+var isUsernameTaken = function (data, cb)
+{
+    return cb(false);
+    db.account.find({username: data.username}, function (err, res)
+    {
+        if (res.length > 0)
+            cb(true);
+        else
+            cb(false);
+    });
+};
+
+var addUser = function (data, cb)
 {
     return cb();
     db.account.insert(
-    {
-        username: data.username,
-        password: data.password
-    }, function(err) {
-        cb();
-    });
-}
+        {
+            username: data.username,
+            password: data.password
+        }, function (err)
+        {
+            cb();
+        });
+};
 
-var io = require('socket.io')(serv,{});
+var io = require('socket.io')(serv, {});
 
-io.sockets.on('connection', function(socket)
+io.sockets.on('connection', function (socket)
 {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
 
     var autoSign = false;
 
-    socket.on('canvasWidth', function(data)
+    socket.on('canvasWidth', function (data)
     {
         canvasWidth = data;
         alert(canvasWidth);
-    })
+    });
 
-    socket.on('canvasHeight', function(data)
+    socket.on('canvasHeight', function (data)
     {
         canvasHeight = data;
         alert(canvasHeight);
-    })
+    });
 
-    socket.on('signIn',function(data)
+    socket.on('signIn', function (data)
     {
-	socket.emit('signInResponse', {success:true});
+        socket.emit('signInResponse', {success: true});
 
-        isValidPassword(data, function(res)
+        isValidPassword(data, function (res)
         {
             if (res)
             {
                 Player.onConnect(socket);
-                socket.emit('signInResponse', {success:true});
-            } else {
-                socket.emit('signInResponse', {success:false});
+                socket.emit('signInResponse', {success: true});
+            }
+            else
+            {
+                socket.emit('signInResponse', {success: false});
             }
         });
     });
 
-    socket.on('signUp',function(data){
-        isUsernameTaken(data,function(res)
+    socket.on('signUp', function (data)
+    {
+        isUsernameTaken(data, function (res)
         {
-            if(res)
+            if (res)
             {
-                socket.emit('signUpResponse',{success:false});
-            } else {
-                addUser(data,function()
+                socket.emit('signUpResponse', {success: false});
+            }
+            else
+            {
+                addUser(data, function ()
                 {
-                    socket.emit('signUpResponse',{success:true});
+                    socket.emit('signUpResponse', {success: true});
                 });
             }
         });
     });
 
-    socket.on('disconnect',function()
+    socket.on('disconnect', function ()
     {
         delete SOCKET_LIST[socket.id];
         Player.onDisconnect(socket);
     });
 
-    socket.on('sendMsgToServer',function(data)
+    socket.on('sendMsgToServer', function (data)
     {
-        var playerName = ("" + socket.id).slice(2,7);
-        for(var i in SOCKET_LIST)
+        var playerName = ("" + socket.id).slice(2, 7);
+        for (var i in SOCKET_LIST)
         {
             SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
         }
     });
 
-    socket.on('evalServer', function(data)
+    socket.on('evalServer', function (data)
     {
         if (!DEBUG) return;
 
@@ -673,7 +699,7 @@ io.sockets.on('connection', function(socket)
     });
 
     // delete this in future, might not be necessary - this can be done locally
-    socket.on('playerChoice', function(data)
+    socket.on('playerChoice', function (data)
     {
         console.log('Recieved player choice - Player ID: ' + data.id + ' Player Choice: ' + data.choice);
         Player.list[data.id].character = data.choice;
@@ -681,6 +707,7 @@ io.sockets.on('connection', function(socket)
 
         var curPlayer = Player.list[data.id];
 
+        // Specific class variables are set
         if (data.choice === 'ninja')
         {
             curPlayer.maxSpd = 10;
@@ -696,29 +723,32 @@ io.sockets.on('connection', function(socket)
         else if (data.choice === 'engineer')
         {
             //Do engineer Stuff
+            curPlayer.bulletSpeed = 0;
+            curPlayer.reload = 1.5;
         }
         else if (data.choice === 'mage')
         {
-            //Do mage Stuff
+            curPlayer.reload = 10;
+            curPlayer.bulletSpeed = 3;
         }
 
         socket.emit('PlayerChoiceAns', data.choice);
     });
 });
 
-var initPack = {player:[], bullet:[], turret:[]};
-var removePack = {player:[], bullet:[], turret:[]};
+var initPack = {player: [], bullet: [], turret: []};
+var removePack = {player: [], bullet: [], turret: []};
 
 var turretCounter = 0;
 var numTurrets = 0;
 
-var createTurret = function(x, y)
+var createTurret = function (x, y)
 {
     var t = Turret(numTurrets++, x, y);
     console.log("Turret Created! " + numTurrets);
-}
+};
 
-setInterval(function()
+setInterval(function ()
 {
     // Generates turrets
 
@@ -729,13 +759,13 @@ setInterval(function()
     // }
 
     var pack =
-    {
-        player:Player.update(),
-        bullet:Bullet.update(),
-        turret:Turret.update(),
-    }
+        {
+            player: Player.update(),
+            bullet: Bullet.update(),
+            turret: Turret.update()
+        };
 
-    for(var i in SOCKET_LIST)
+    for (var i in SOCKET_LIST)
     {
         var socket = SOCKET_LIST[i];
         socket.emit('init', initPack);
@@ -750,4 +780,4 @@ setInterval(function()
     removePack.bullet = [];
     removePack.turret = [];
 
-},1000/25);
+}, 1000 / 25);
