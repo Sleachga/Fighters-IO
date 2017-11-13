@@ -1,7 +1,12 @@
 # Fighters.io
-##### I built this game on my other computer 
-##### When my old computer broke I had a ton of issues with Github so I compressed the files, moved them over to my new computer, Made a new project on github and deleted the old one
 
-##### Because of this I don't have the old commits but I commented most of my code so it should make sense.  Apologies for anyone looking for the old commits.
+### CONTROLS: 
+* WASD to move
+* Mouse + Click to shoot
 
-##### Trying to get this up on Heroku currently
+### CLASSES:
+
+* Mage - Sniper class, low rate of fire, high speed high damage.
+* Engineer - Lays traps, high movement speed, high rate of fire.
+* Ninja - Shoots many low damage shurikens, high movement speed.
+* Knight - Shoots one slow moving high damage projectile, shield will block bullets eventually
