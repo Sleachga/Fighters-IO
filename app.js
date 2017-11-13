@@ -338,6 +338,7 @@ var Player = function (id)
             self.spdY = 0;
     };
 
+    // Data needed in init package
     self.getInitPack = function ()
     {
         return {
@@ -352,6 +353,7 @@ var Player = function (id)
         };
     };
 
+    // Data needed un update package
     self.getUpdatePack = function ()
     {
         if (!self.pickedClass)
@@ -403,13 +405,8 @@ Player.onConnect = function (socket)
         else if (data.inputId === 'attack')
             player.pressingAttack = data.state;
         else if (data.inputId === 'mouseAngle')
-        {
             if (Player.list[data.id])
                 Player.list[data.id].mouseAngle = Math.round(data.state);
-
-
-            // player.list[data.id].mouseAngle = Math.round(data.state);
-        }
 
         else if (data.inputId === 'space')
             player.special = data.state;
